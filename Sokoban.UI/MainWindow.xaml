@@ -1,0 +1,116 @@
+﻿<Window x:Class="Sokoban.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Sokoban.UI"
+        mc:Ignorable="d"
+        Title="Sokoban Game" Height="600" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Üst Menü -->
+        <Menu Grid.Row="0">
+            <MenuItem Header="Oyun">
+                <MenuItem Header="Yeni Oyun" Command="{Binding NewGameCommand}"/>
+                <MenuItem Header="Seviye Yükle" Command="{Binding LoadLevelCommand}"/>
+                <MenuItem Header="Kaydet" Command="{Binding SaveGameCommand}"/>
+                <MenuItem Header="Çıkış" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Oyun Alanı -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Oyun Tahtası -->
+            <!-- Oyun Tahtası -->
+            <Border Grid.Column="0" 
+                BorderBrush="Black" 
+                BorderThickness="1" 
+                Margin="10"
+                Background="LightGray">
+                <ItemsControl ItemsSource="{Binding GameBoard}"
+                      Name="GameBoardControl"
+                      Width="400"
+                      Height="400"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="{Binding BoardHeight}" 
+                                Columns="{Binding BoardWidth}"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="DarkGray" 
+                            BorderThickness="1"
+                            Background="White">
+                                <Image Source="{Binding ImageSource}" 
+                               Stretch="Uniform"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <!-- Sağ Panel -->
+            <StackPanel Grid.Column="1" Margin="10">
+                <!-- Seviye Bilgisi -->
+                <TextBlock Text="{Binding CurrentLevel, StringFormat='Seviye: {0}'}"
+                           FontSize="16" Margin="0,0,0,10"/>
+
+                <!-- Hamle Sayısı -->
+                <TextBlock Text="{Binding MovesCount, StringFormat='Hamle: {0}'}"
+                           FontSize="16" Margin="0,0,0,10"/>
+
+                <!-- Süre -->
+                <TextBlock Text="{Binding ElapsedTime, StringFormat='Süre: {0}'}"
+                           FontSize="16" Margin="0,0,0,20"/>
+
+                <!-- Aktif Güç Geliştirmeler -->
+                <TextBlock Text="Aktif Güç Geliştirmeler:"
+                           FontSize="16" Margin="0,0,0,5"/>
+                <ItemsControl ItemsSource="{Binding ActivePowerUps}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <Image Source="{Binding IconSource}" 
+                                       Width="24" Height="24"/>
+                                <TextBlock Text="{Binding Name}" 
+                                           Margin="5,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+
+        <!-- Alt Panel - Kontroller -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                    HorizontalAlignment="Center" Margin="10">
+            <Button Content="←" Command="{Binding MoveCommand}" 
+                    CommandParameter="Left" Width="40" Height="40"
+                    Margin="2"/>
+            <Button Content="↑" Command="{Binding MoveCommand}"
+                    CommandParameter="Up" Width="40" Height="40"
+                    Margin="2"/>
+            <Button Content="↓" Command="{Binding MoveCommand}"
+                    CommandParameter="Down" Width="40" Height="40"
+                    Margin="2"/>
+            <Button Content="→" Command="{Binding MoveCommand}"
+                    CommandParameter="Right" Width="40" Height="40"
+                    Margin="2"/>
+        </StackPanel>
+    </Grid>
+</Window>
