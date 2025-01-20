@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Sokoban.Application.DTOs;
+﻿using Sokoban.Application.DTOs;
 using Sokoban.Application.Interfaces;
 using Sokoban.Core.Entities;
 using Sokoban.Core.Enums;
+using System.Diagnostics;
 
 namespace Sokoban.Application.Services
 {
     public class GameService : IGameService
     {
         private readonly IMovementService _movementService;
-        private readonly IPowerUpService _powerUpService;
         private readonly ILevelRepository _levelRepository;
         private readonly IGameStateRepository _gameStateRepository;
 
@@ -27,12 +22,10 @@ namespace Sokoban.Application.Services
 
         public GameService(
             IMovementService movementService,
-            IPowerUpService powerUpService,
             ILevelRepository levelRepository,
             IGameStateRepository gameStateRepository)
         {
             _movementService = movementService;
-            _powerUpService = powerUpService;
             _levelRepository = levelRepository;
             _gameStateRepository = gameStateRepository;
 
@@ -82,24 +75,11 @@ namespace Sokoban.Application.Services
             return GetCurrentState();
         }
 
-        //public async Task<GameStateDto> UsePowerUpAsync(PowerUpType powerUp)
-        //{
-        //    if (!_player.ActivePowerUps.Contains(powerUp))
-        //        return GetCurrentState();
-
-        //    bool powerUpUsed = _powerUpService.UsePowerUp(_player, powerUp, _boxes, _walls);
-        //    if (powerUpUsed)
-        //    {
-        //        _movesCount++;
-
-        //        CheckGameState();
-        //        await SaveGameAsync();
-        //    }
-
-        //    return GetCurrentState();
-        //}
         public async Task<GameStateDto> UsePowerUpAsync(PowerUpType powerUp, Direction direction)
         {
+            if (!_player.ActivePowerUps.Contains(powerUp))
+                return GetCurrentState();
+
             Debug.WriteLine($"Attempting to use power {powerUp} in direction {direction}");
             bool powerUpUsed = false;
 
@@ -121,7 +101,6 @@ namespace Sokoban.Application.Services
                     break;
 
                 case PowerUpType.Throw:
-                    // Oyuncunun yanındaki kutuyu bul
                     var nearestBox = _boxes.OrderBy(b =>
                         Math.Abs(b.X - _player.X) + Math.Abs(b.Y - _player.Y))
                         .FirstOrDefault();
@@ -213,7 +192,6 @@ namespace Sokoban.Application.Services
                 BoardHeight = CalculateBoardHeight()
             };
 
-            Debug.WriteLine($"Current game state - Board size: {state.BoardWidth}x{state.BoardHeight}");
             return state;
         }
 
@@ -255,7 +233,6 @@ namespace Sokoban.Application.Services
             if (_powerUps.Any())
                 maxX = Math.Max(maxX, _powerUps.Max(p => p.X));
 
-            Debug.WriteLine($"Calculated board width: {maxX + 1}");
             return maxX + 1; // +1 because coordinates are 0-based
         }
 

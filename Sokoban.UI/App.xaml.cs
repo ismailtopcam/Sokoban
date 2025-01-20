@@ -111,7 +111,6 @@ namespace Sokoban.UI
 
                 // Application Services
                 services.AddSingleton<IMovementService, MovementService>();
-                services.AddSingleton<IPowerUpService, PowerUpService>();
                 services.AddSingleton<IGameService, GameService>();
 
                 // UI Services

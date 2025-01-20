@@ -10,15 +10,15 @@ namespace Sokoban.Infrastructure.Repositories
     {
         private readonly string _levelsDirectory;
         private const string DEFAULT_LEVEL = @"##########
-                                            #        #
-                                            # @   $  #
-                                            #    #   #
-                                            #  P   . #
-                                            #   B    #
-                                            #    S   #
-                                            #     K  #
-                                            #        #
-                                            ##########";
+                                               #        #
+                                               # @   $  #
+                                               #    #   #
+                                               #  P   . #
+                                               #   B    #
+                                               #    S   #
+                                               #     K  #
+                                               #        #
+                                               ##########";
 
         public LevelRepository(string levelsDirectory)
         {
@@ -30,7 +30,6 @@ namespace Sokoban.Infrastructure.Repositories
             if (!File.Exists(defaultLevelPath))
             {
                 File.WriteAllText(defaultLevelPath, DEFAULT_LEVEL);
-                Debug.WriteLine($"Default level created at: {defaultLevelPath}");
             }
         }
 
@@ -38,12 +37,10 @@ namespace Sokoban.Infrastructure.Repositories
         {
             try
             {
-                Debug.WriteLine($"Attempting to load level: {levelFile}");
                 var filePath = Path.Combine(_levelsDirectory, levelFile);
 
                 if (!File.Exists(filePath))
                 {
-                    Debug.WriteLine($"Level file not found: {filePath}");
                     return null;
                 }
 
@@ -56,7 +53,6 @@ namespace Sokoban.Infrastructure.Repositories
                 };
 
                 var lines = await File.ReadAllLinesAsync(filePath);
-                Debug.WriteLine($"Level file loaded with {lines.Length} lines");
 
                 for (int y = 0; y < lines.Length; y++)
                 {
@@ -117,7 +113,6 @@ namespace Sokoban.Infrastructure.Repositories
                     }
                 }
 
-                Debug.WriteLine($"Level loaded successfully with: {level.Walls.Count} walls, {level.Boxes.Count} boxes, {level.Targets.Count} targets, {level.PowerUps.Count} powerups");
                 return level;
             }
             catch (Exception ex)
@@ -222,7 +217,6 @@ namespace Sokoban.Infrastructure.Repositories
                     }
                 }
 
-                Debug.WriteLine("Level saved successfully");
                 return true;
             }
             catch (Exception ex)
@@ -239,7 +233,6 @@ namespace Sokoban.Infrastructure.Repositories
                 var levels = Directory.GetFiles(_levelsDirectory, "*.sok")
                     .Select(Path.GetFileName)
                     .ToList();
-                Debug.WriteLine($"Found {levels.Count} levels: {string.Join(", ", levels)}");
                 return levels;
             }
             catch (Exception ex)

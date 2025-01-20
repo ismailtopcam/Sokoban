@@ -1,5 +1,6 @@
 ﻿using Sokoban.Application.DTOs;
 using Sokoban.Application.Interfaces;
+using System.Diagnostics;
 
 namespace Sokoban.Infrastructure.Repositories
 {
@@ -27,7 +28,7 @@ namespace Sokoban.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Loglama yapılabilir
+                Debug.WriteLine($"Error saving level: {ex}");
                 return null;
             }
         }
@@ -43,7 +44,7 @@ namespace Sokoban.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Loglama yapılabilir
+                Debug.WriteLine($"Error saving level: {ex}");
                 return false;
             }
         }

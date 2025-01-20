@@ -14,7 +14,5 @@ namespace Sokoban.Application.DTOs
         public List<Wall> Walls { get; set; } = new();
         public List<Target> Targets { get; set; } = new();
         public List<PowerUp> PowerUps { get; set; } = new();
-        public int LevelNumber { get; set; }
-        public string LevelName { get; set; }
     }
 }

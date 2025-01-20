@@ -35,7 +35,6 @@ namespace Sokoban.Application.Services
         {
             Debug.WriteLine($"Attempting to pull box. Player at ({player.X}, {player.Y})");
 
-            // Önce oyuncunun etrafındaki en yakın kutuyu bul
             var nearestBox = FindNearestBox(player, boxes);
             if (nearestBox == null)
             {
@@ -47,7 +46,6 @@ namespace Sokoban.Application.Services
             Direction pullDirection = DeterminePullDirection(player, nearestBox);
             Debug.WriteLine($"Determined pull direction: {pullDirection}");
 
-            // Oyuncunun gideceği pozisyonu hesapla (kutunun tersi yönünde)
             int newPlayerX = player.X;
             int newPlayerY = player.Y;
 
@@ -77,7 +75,6 @@ namespace Sokoban.Application.Services
                 return false;
             }
 
-            // Hareketi gerçekleştir
             int newBoxX = player.X;
             int newBoxY = player.Y;
 
@@ -240,18 +237,6 @@ namespace Sokoban.Application.Services
                     x++;
                     break;
             }
-        }
-
-        private Direction GetOppositeDirection(Direction direction)
-        {
-            return direction switch
-            {
-                Direction.Up => Direction.Down,
-                Direction.Down => Direction.Up,
-                Direction.Left => Direction.Right,
-                Direction.Right => Direction.Left,
-                _ => direction
-            };
         }
 
         private bool IsAdjacent(Player player, Box box)

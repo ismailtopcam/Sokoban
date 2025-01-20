@@ -28,7 +28,7 @@ namespace Sokoban.UI.ViewModels
         private TimeSpan _elapsedTime;
 
         public ICommand UsePowerUpCommand { get; private set; }
-        private Direction _lastMoveDirection = Direction.Right; // Son hareket yönünü tut
+        private Direction _lastMoveDirection = Direction.Right;
 
         public MainViewModel(IGameService gameService)
         {
@@ -36,10 +36,6 @@ namespace Sokoban.UI.ViewModels
             {
                 var testUri = new Uri("pack://application:,,,/Sokoban.UI;component/Images/player.png");
                 var stream = System.Windows.Application.GetResourceStream(testUri);
-                if (stream != null)
-                {
-                    Debug.WriteLine("PNG resource loaded successfully!");
-                }
             }
             catch (Exception ex)
             {
@@ -50,7 +46,6 @@ namespace Sokoban.UI.ViewModels
             _gameBoard = new ObservableCollection<GameBoardCell>();
             _activePowerUps = new ObservableCollection<PowerUpViewModel>();
 
-            // Komutları başlat
             InitializeCommands();
 
             // Timer'ı başlat
@@ -229,7 +224,7 @@ namespace Sokoban.UI.ViewModels
         {
             MoveCommand = new RelayCommand<Direction>(async direction =>
             {
-                _lastMoveDirection = direction; // Son hareket yönünü kaydet
+                _lastMoveDirection = direction;
                 await ExecuteMove(direction);
             });
 
@@ -242,7 +237,6 @@ namespace Sokoban.UI.ViewModels
             LoadLevelCommand = new RelayCommand(ExecuteLoadLevel);
             SaveGameCommand = new RelayCommand(ExecuteSaveGame);
             ExitCommand = new RelayCommand(ExecuteExit);
-            //MoveCommand = new RelayCommand<Direction>(ExecuteMove);
         }
         private async Task ExecuteUsePowerUp(PowerUpType powerUp, Direction direction)
         {
@@ -253,7 +247,6 @@ namespace Sokoban.UI.ViewModels
                 if (newState != null)
                 {
                     _currentGameState = newState;
-                    //MovesCount = newState.MovesCount;
                     UpdateGameBoard();
                     Debug.WriteLine($"Power {powerUp} executed successfully");
                 }
@@ -332,34 +325,6 @@ namespace Sokoban.UI.ViewModels
             {
                 ActivePowerUps.Add(new PowerUpViewModel(powerUp));
             }
-        }
-
-        private int CalculateBoardWidth()
-        {
-            return Math.Max(
-                Math.Max(
-                    _currentGameState.Walls.Max(w => w.X),
-                    _currentGameState.Boxes.Max(b => b.X)
-                ),
-                Math.Max(
-                    _currentGameState.Targets.Max(t => t.X),
-                    _currentGameState.PowerUps.Max(p => p.X)
-                )
-            ) + 1;
-        }
-
-        private int CalculateBoardHeight()
-        {
-            return Math.Max(
-                Math.Max(
-                    _currentGameState.Walls.Max(w => w.Y),
-                    _currentGameState.Boxes.Max(b => b.Y)
-                ),
-                Math.Max(
-                    _currentGameState.Targets.Max(t => t.Y),
-                    _currentGameState.PowerUps.Max(p => p.Y)
-                )
-            ) + 1;
         }
 
         private void ShowLevelCompleteDialog()

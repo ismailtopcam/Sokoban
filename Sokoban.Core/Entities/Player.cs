@@ -1,10 +1,5 @@
 ﻿using Sokoban.Core.Enums;
 using Sokoban.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sokoban.Core.Entities
 {
@@ -13,7 +8,7 @@ namespace Sokoban.Core.Entities
         public int X { get; set; }
         public int Y { get; set; }
         public List<PowerUpType> ActivePowerUps { get; private set; }
-        public Direction? LastMoveDirection { get; set; }  // Son hareket yönü
+        public Direction? LastMoveDirection { get; set; }
         public bool CanPull { get; private set; }
         public bool CanStrongPush { get; private set; }
         public bool CanSprint { get; private set; }

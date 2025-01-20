@@ -31,7 +31,6 @@
             </Grid.ColumnDefinitions>
 
             <!-- Oyun Tahtası -->
-            <!-- Oyun Tahtası -->
             <Border Grid.Column="0" 
                 BorderBrush="Black" 
                 BorderThickness="1" 

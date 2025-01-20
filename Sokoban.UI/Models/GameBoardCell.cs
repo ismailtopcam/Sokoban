@@ -23,7 +23,7 @@ namespace Sokoban.UI.Models
 
         public GameBoardCell()
         {
-            ImageSource = "pack://application:,,,/Sokoban.UI;component/Images/floor.png";  // Varsayılan olarak zemin göster
+            ImageSource = "pack://application:,,,/Sokoban.UI;component/Images/floor.png";
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
