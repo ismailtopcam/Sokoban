@@ -15,7 +15,7 @@
 
         <!-- Üst Menü -->
         <Menu Grid.Row="0">
-            <MenuItem Header="Oyun">
+            <MenuItem Header="Menü">
                 <MenuItem Header="Yeni Oyun" Command="{Binding NewGameCommand}"/>
                 <MenuItem Header="Seviye Yükle" Command="{Binding LoadLevelCommand}"/>
                 <MenuItem Header="Kaydet" Command="{Binding SaveGameCommand}"/>
