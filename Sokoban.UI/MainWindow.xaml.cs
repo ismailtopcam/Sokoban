@@ -1,15 +1,8 @@
 ﻿using Sokoban.Core.Enums;
 using Sokoban.UI.ViewModels;
-using System.Text;
+using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Sokoban.UI;
 
@@ -46,8 +39,34 @@ public partial class MainWindow : Window
             case Key.Down:
                 _viewModel.MoveCommand.Execute(Direction.Down);
                 break;
-            case Key.R:
+            case Key.F5:
                 _viewModel.NewGameCommand.Execute(null);
+                break;
+
+            // Güç geliştirmeleri
+            case Key.P:
+                _viewModel.UsePowerUpCommand.Execute(PowerUpType.Pull);
+                Debug.WriteLine("Pull power key pressed");
+                break;
+            case Key.S:
+                _viewModel.UsePowerUpCommand.Execute(PowerUpType.Push);
+                Debug.WriteLine("StrongPush power key pressed");
+                break;
+            case Key.R:
+                _viewModel.UsePowerUpCommand.Execute(PowerUpType.Sprint);
+                Debug.WriteLine("Sprint power key pressed");
+                break;
+            case Key.T:
+                _viewModel.UsePowerUpCommand.Execute(PowerUpType.Throw);
+                Debug.WriteLine("Throw power key pressed");
+                break;
+            case Key.K:
+                _viewModel.UsePowerUpCommand.Execute(PowerUpType.Skateboard);
+                Debug.WriteLine("Skateboard power key pressed");
+                break;
+            case Key.F:
+                _viewModel.UsePowerUpCommand.Execute(PowerUpType.Punch);
+                Debug.WriteLine("StrongPunch power key pressed");
                 break;
         }
     }

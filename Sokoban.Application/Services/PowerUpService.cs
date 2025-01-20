@@ -60,7 +60,7 @@ namespace Sokoban.Application.Services
 
             // Kutuyu çekme yönünü belirle
             var direction = DetermineDirection(player, nearestBox);
-            return _movementService.TryPullBox(player, nearestBox, direction, boxes, walls);
+            return _movementService.TryPullBox(player, direction, boxes, walls);
         }
 
         private bool HandleStrongPushPowerUp(Player player, List<Box> boxes, List<Wall> walls)
@@ -133,6 +133,8 @@ namespace Sokoban.Application.Services
 
         private Direction DetermineDirection(Player player, Box box)
         {
+            return player.LastMoveDirection ?? Direction.Right;
+
             if (Math.Abs(player.X - box.X) > Math.Abs(player.Y - box.Y))
             {
                 return player.X > box.X ? Direction.Left : Direction.Right;

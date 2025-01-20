@@ -27,6 +27,9 @@ namespace Sokoban.UI.ViewModels
         private int _boardHeight;
         private TimeSpan _elapsedTime;
 
+        public ICommand UsePowerUpCommand { get; private set; }
+        private Direction _lastMoveDirection = Direction.Right; // Son hareket yönünü tut
+
         public MainViewModel(IGameService gameService)
         {
             try
@@ -224,13 +227,42 @@ namespace Sokoban.UI.ViewModels
 
         private void InitializeCommands()
         {
+            MoveCommand = new RelayCommand<Direction>(async direction =>
+            {
+                _lastMoveDirection = direction; // Son hareket yönünü kaydet
+                await ExecuteMove(direction);
+            });
+
+            UsePowerUpCommand = new RelayCommand<PowerUpType>(async powerUp =>
+            {
+                await ExecuteUsePowerUp(powerUp, _lastMoveDirection);
+            });
+
             NewGameCommand = new RelayCommand(ExecuteNewGame);
             LoadLevelCommand = new RelayCommand(ExecuteLoadLevel);
             SaveGameCommand = new RelayCommand(ExecuteSaveGame);
             ExitCommand = new RelayCommand(ExecuteExit);
-            MoveCommand = new RelayCommand<Direction>(ExecuteMove);
+            //MoveCommand = new RelayCommand<Direction>(ExecuteMove);
         }
-
+        private async Task ExecuteUsePowerUp(PowerUpType powerUp, Direction direction)
+        {
+            try
+            {
+                Debug.WriteLine($"Executing power {powerUp} in direction {direction}");
+                var newState = await _gameService.UsePowerUpAsync(powerUp, direction);
+                if (newState != null)
+                {
+                    _currentGameState = newState;
+                    //MovesCount = newState.MovesCount;
+                    UpdateGameBoard();
+                    Debug.WriteLine($"Power {powerUp} executed successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error executing power {powerUp}: {ex}");
+            }
+        }
         private async void ExecuteLoadLevel()
         {
             var dialog = new OpenFileDialog
@@ -260,7 +292,7 @@ namespace Sokoban.UI.ViewModels
             mainWindow?.Close();
         }
 
-        private async void ExecuteMove(Direction direction)
+        private async Task ExecuteMove(Direction direction)
         {
             var newState = await _gameService.MovePlayerAsync(direction);
             UpdateGameState(newState);

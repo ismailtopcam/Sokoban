@@ -110,7 +110,7 @@ namespace Sokoban.Application.Services
                     Debug.WriteLine($"Pull power used: {powerUpUsed}");
                     break;
 
-                case PowerUpType.StrongPush:
+                case PowerUpType.Push:
                     powerUpUsed = _movementService.TryStrongPush(_player, _boxes, direction, _walls);
                     Debug.WriteLine($"StrongPush power used: {powerUpUsed}");
                     break;
@@ -137,7 +137,7 @@ namespace Sokoban.Application.Services
                     Debug.WriteLine($"Skateboard power used: {powerUpUsed}");
                     break;
 
-                case PowerUpType.StrongPunch:
+                case PowerUpType.Punch:
                     // Yıkılabilir duvarı bul
                     var wallToBreak = _walls.FirstOrDefault(w =>
                         w.IsBreakable &&

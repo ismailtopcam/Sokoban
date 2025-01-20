@@ -13,6 +13,7 @@ namespace Sokoban.Core.Entities
         public int X { get; set; }
         public int Y { get; set; }
         public List<PowerUpType> ActivePowerUps { get; private set; }
+        public Direction? LastMoveDirection { get; set; }  // Son hareket yönü
         public bool CanPull { get; private set; }
         public bool CanStrongPush { get; private set; }
         public bool CanSprint { get; private set; }
@@ -68,6 +69,7 @@ namespace Sokoban.Core.Entities
                     X++;
                     break;
             }
+            LastMoveDirection = direction;
         }
 
         public void SetPosition(int x, int y)

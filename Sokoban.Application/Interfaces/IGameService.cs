@@ -7,7 +7,7 @@ namespace Sokoban.Application.Interfaces
     {
         Task<bool> InitializeGameAsync(string levelFile);
         Task<GameStateDto> MovePlayerAsync(Direction direction);
-        Task<GameStateDto> UsePowerUpAsync(PowerUpType powerUp);
+        Task<GameStateDto> UsePowerUpAsync(PowerUpType powerUp, Direction direction);
         Task<bool> SaveGameAsync();
         Task<bool> LoadGameAsync();
         GameStateDto GetCurrentState();

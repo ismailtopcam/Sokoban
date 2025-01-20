@@ -1,6 +1,6 @@
-﻿using Sokoban.Application.Interfaces;
-using Sokoban.Core.Entities;
+﻿using Sokoban.Core.Entities;
 using Sokoban.Core.Enums;
+using System.Diagnostics;
 
 namespace Sokoban.Application.Services
 {
@@ -11,7 +11,6 @@ namespace Sokoban.Application.Services
             int newX = player.X;
             int newY = player.Y;
 
-            // Yeni pozisyonu hesapla
             UpdatePosition(ref newX, ref newY, direction);
 
             // Duvar kontrolü
@@ -32,103 +31,141 @@ namespace Sokoban.Application.Services
             return true;
         }
 
-        public bool CanMoveBox(Box box, Direction direction, List<Box> boxes, List<Wall> walls)
+        public bool TryPullBox(Player player, Direction direction, List<Box> boxes, List<Wall> walls)
         {
-            int newX = box.X;
-            int newY = box.Y;
+            Debug.WriteLine($"Attempting to pull box. Player at ({player.X}, {player.Y})");
 
-            UpdatePosition(ref newX, ref newY, direction);
-
-            // Duvar veya diğer kutu kontrolü
-            return !walls.Any(w => w.X == newX && w.Y == newY) &&
-                   !boxes.Any(b => b.X == newX && b.Y == newY);
-        }
-
-        public bool TryPullBox(Player player, Box box, Direction direction, List<Box> boxes, List<Wall> walls)
-        {
-            if (!player.CanPull)
+            // Önce oyuncunun etrafındaki en yakın kutuyu bul
+            var nearestBox = FindNearestBox(player, boxes);
+            if (nearestBox == null)
+            {
+                Debug.WriteLine("No box found near player");
                 return false;
+            }
 
-            // Oyuncunun arkasındaki kutuyu kontrol et
-            int behindX = player.X;
-            int behindY = player.Y;
-            UpdatePosition(ref behindX, ref behindY, GetOppositeDirection(direction));
+            // Kutunun oyuncuya göre yönünü belirle
+            Direction pullDirection = DeterminePullDirection(player, nearestBox);
+            Debug.WriteLine($"Determined pull direction: {pullDirection}");
 
-            var boxToPull = boxes.FirstOrDefault(b => b.X == behindX && b.Y == behindY);
-            if (boxToPull == null)
-                return false;
-
-            // Oyuncunun yeni pozisyonunu kontrol et
+            // Oyuncunun gideceği pozisyonu hesapla (kutunun tersi yönünde)
             int newPlayerX = player.X;
             int newPlayerY = player.Y;
-            UpdatePosition(ref newPlayerX, ref newPlayerY, direction);
 
+            switch (pullDirection)
+            {
+                case Direction.Up:
+                    newPlayerY--;
+                    break;
+                case Direction.Down:
+                    newPlayerY++;
+                    break;
+                case Direction.Left:
+                    newPlayerX--;
+                    break;
+                case Direction.Right:
+                    newPlayerX++;
+                    break;
+            }
+
+            Debug.WriteLine($"Checking if player can move to ({newPlayerX}, {newPlayerY})");
+
+            // Hareket edilecek yerde engel var mı kontrol et
             if (walls.Any(w => w.X == newPlayerX && w.Y == newPlayerY) ||
-                boxes.Any(b => b.X == newPlayerX && b.Y == newPlayerY && b != boxToPull))
+                boxes.Any(b => b.X == newPlayerX && b.Y == newPlayerY))
+            {
+                Debug.WriteLine("Path is blocked");
                 return false;
+            }
 
             // Hareketi gerçekleştir
-            player.Move(direction);
-            boxToPull.Move(direction);
+            int newBoxX = player.X;
+            int newBoxY = player.Y;
+
+            Debug.WriteLine($"Moving player to ({newPlayerX}, {newPlayerY})");
+            player.X = newPlayerX;
+            player.Y = newPlayerY;
+
+            Debug.WriteLine($"Moving box to ({newBoxX}, {newBoxY})");
+            nearestBox.X = newBoxX;
+            nearestBox.Y = newBoxY;
+
+            Debug.WriteLine("Pull successful");
             return true;
         }
+        private Box FindNearestBox(Player player, List<Box> boxes)
+        {
+            // Sadece oyuncunun yanındaki kutuları bul (1 kare mesafede)
+            return boxes.FirstOrDefault(b =>
+                (Math.Abs(b.X - player.X) == 1 && b.Y == player.Y) ||
+                (Math.Abs(b.Y - player.Y) == 1 && b.X == player.X));
+        }
+        private Direction DeterminePullDirection(Player player, Box box)
+        {
+            // Kutunun oyuncuya göre yönünü belirle
+            if (box.X == player.X)
+            {
+                if (box.Y < player.Y)
+                    return Direction.Down;  // Kutu oyuncunun altındaysa aşağı çek
+                else
+                    return Direction.Up;    // Kutu oyuncunun üstündeyse yukarı çek
+            }
+            else
+            {
+                if (box.X < player.X)
+                    return Direction.Right; // Kutu oyuncunun sağındaysa sağa çek
+                else
+                    return Direction.Left;  // Kutu oyuncunun solundaysa sola çek
+            }
+        }
+
 
         public bool TryStrongPush(Player player, List<Box> boxes, Direction direction, List<Wall> walls)
         {
-            if (!player.CanStrongPush)
-                return false;
+            // Önündeki iki kutuyu kontrol et
+            int firstX = player.X;
+            int firstY = player.Y;
+            UpdatePosition(ref firstX, ref firstY, direction);
 
-            int frontX = player.X;
-            int frontY = player.Y;
-            UpdatePosition(ref frontX, ref frontY, direction);
-
-            // İlk kutuyu bul
-            var firstBox = boxes.FirstOrDefault(b => b.X == frontX && b.Y == frontY);
-            if (firstBox == null)
-                return false;
-
-            // İkinci kutu pozisyonunu kontrol et
-            int secondX = frontX;
-            int secondY = frontY;
+            int secondX = firstX;
+            int secondY = firstY;
             UpdatePosition(ref secondX, ref secondY, direction);
 
+            // İki kutu peş peşe mi kontrol et
+            var firstBox = boxes.FirstOrDefault(b => b.X == firstX && b.Y == firstY);
             var secondBox = boxes.FirstOrDefault(b => b.X == secondX && b.Y == secondY);
-            if (secondBox == null)
+
+            if (firstBox == null || secondBox == null)
                 return false;
 
-            // İkinci kutudan sonraki pozisyonu kontrol et
-            int finalX = secondX;
-            int finalY = secondY;
-            UpdatePosition(ref finalX, ref finalY, direction);
+            // İkinci kutunun gideceği yeri kontrol et
+            int thirdX = secondX;
+            int thirdY = secondY;
+            UpdatePosition(ref thirdX, ref thirdY, direction);
 
-            if (walls.Any(w => w.X == finalX && w.Y == finalY) ||
-                boxes.Any(b => b.X == finalX && b.Y == finalY && b != firstBox && b != secondBox))
+            if (walls.Any(w => w.X == thirdX && w.Y == thirdY) ||
+                boxes.Any(b => b.X == thirdX && b.Y == thirdY && b != firstBox && b != secondBox))
                 return false;
 
-            // Kutuları hareket ettir
+            // Kutuları it
             secondBox.Move(direction);
             firstBox.Move(direction);
-            player.Move(direction);
             return true;
         }
 
         public bool TrySprintMove(Player player, Direction direction, List<Box> boxes, List<Wall> walls)
         {
-            if (!player.CanSprint)
-                return false;
-
             int newX = player.X;
             int newY = player.Y;
-            UpdatePosition(ref newX, ref newY, direction, 2); // 2 kare hareket
 
-            // Yol üzerinde engel kontrolü
-            int intermediateX = player.X;
-            int intermediateY = player.Y;
-            UpdatePosition(ref intermediateX, ref intermediateY, direction);
+            // İki adım ilerlet
+            for (int i = 0; i < 2; i++)
+            {
+                UpdatePosition(ref newX, ref newY, direction);
 
-            if (walls.Any(w => (w.X == intermediateX && w.Y == intermediateY) || (w.X == newX && w.Y == newY)) ||
-                boxes.Any(b => (b.X == intermediateX && b.Y == intermediateY) || (b.X == newX && b.Y == newY)))
-                return false;
+                if (walls.Any(w => w.X == newX && w.Y == newY) ||
+                    boxes.Any(b => b.X == newX && b.Y == newY))
+                    return false;
+            }
 
             player.X = newX;
             player.Y = newY;
@@ -137,24 +174,23 @@ namespace Sokoban.Application.Services
 
         public bool TryThrowBox(Player player, Box box, Direction direction, List<Box> boxes, List<Wall> walls)
         {
-            if (!player.CanThrow)
-                return false;
-
-            // Fırlatılacak kutunun oyuncunun yanında olduğunu kontrol et
             if (!IsAdjacent(player, box))
                 return false;
 
-            // Hedef pozisyonu hesapla (2 kare öte)
             int targetX = box.X;
             int targetY = box.Y;
-            UpdatePosition(ref targetX, ref targetY, direction, 2);
 
-            // Hedef pozisyonda engel kontrolü
+            // İki kare ilerlet
+            for (int i = 0; i < 2; i++)
+            {
+                UpdatePosition(ref targetX, ref targetY, direction);
+            }
+
+            // Hedef noktada engel var mı kontrol et
             if (walls.Any(w => w.X == targetX && w.Y == targetY) ||
                 boxes.Any(b => b.X == targetX && b.Y == targetY && b != box))
                 return false;
 
-            // Kutuyu fırlat
             box.X = targetX;
             box.Y = targetY;
             return true;
@@ -162,50 +198,46 @@ namespace Sokoban.Application.Services
 
         public bool TrySkateboardMove(Player player, Direction direction, List<Box> boxes, List<Wall> walls)
         {
-            if (!player.CanSkateboard)
-                return false;
-
-            int currentX = player.X;
-            int currentY = player.Y;
+            int newX = player.X;
+            int newY = player.Y;
 
             while (true)
             {
-                int nextX = currentX;
-                int nextY = currentY;
+                int nextX = newX;
+                int nextY = newY;
                 UpdatePosition(ref nextX, ref nextY, direction);
 
-                // Engel kontrolü
                 if (walls.Any(w => w.X == nextX && w.Y == nextY) ||
                     boxes.Any(b => b.X == nextX && b.Y == nextY))
                     break;
 
-                currentX = nextX;
-                currentY = nextY;
+                newX = nextX;
+                newY = nextY;
             }
 
-            if (currentX == player.X && currentY == player.Y)
+            if (newX == player.X && newY == player.Y)
                 return false;
 
-            player.X = currentX;
-            player.Y = currentY;
+            player.X = newX;
+            player.Y = newY;
             return true;
         }
 
-        private void UpdatePosition(ref int x, ref int y, Direction direction, int steps = 1)
+        private void UpdatePosition(ref int x, ref int y, Direction direction)
         {
             switch (direction)
             {
                 case Direction.Up:
-                    y -= steps;
+                    y--;
                     break;
                 case Direction.Down:
-                    y += steps;
+                    y++;
                     break;
                 case Direction.Left:
-                    x -= steps;
+                    x--;
                     break;
                 case Direction.Right:
-                    x += steps;
+                    x++;
                     break;
             }
         }
@@ -218,7 +250,7 @@ namespace Sokoban.Application.Services
                 Direction.Down => Direction.Up,
                 Direction.Left => Direction.Right,
                 Direction.Right => Direction.Left,
-                _ => throw new ArgumentException("Invalid direction")
+                _ => direction
             };
         }
 
@@ -226,6 +258,16 @@ namespace Sokoban.Application.Services
         {
             return (Math.Abs(player.X - box.X) == 1 && player.Y == box.Y) ||
                    (Math.Abs(player.Y - box.Y) == 1 && player.X == box.X);
+        }
+
+        private bool CanMoveBox(Box box, Direction direction, List<Box> boxes, List<Wall> walls)
+        {
+            int newX = box.X;
+            int newY = box.Y;
+            UpdatePosition(ref newX, ref newY, direction);
+
+            return !walls.Any(w => w.X == newX && w.Y == newY) &&
+                   !boxes.Any(b => b.X == newX && b.Y == newY && b != box);
         }
     }
 }
